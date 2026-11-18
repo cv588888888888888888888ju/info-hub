@@ -1,7 +1,6 @@
 # info-hub 行为层设计草案（数据 → 行为特征 → 判定口径）
 
-- 日期：2026-10-22
-- 状态：**部分实施**（2026-10-22）—— M10 转译层已落地：`activity` 采样 + `episodes` 片段 + 专注度 + `bin/hub-activity`，`tests/verify_m10.sh` 18 项全过；**M11 画面语义层也已落地**（`bin/hub-vision`，把已存截屏读成类别，`tests/verify_m11.sh` 16 项全过）；§10 的五个待定项仍待拍板，L1-b「产出事件」与 actor 归属**还没做**
+- **子系统状态**（非项目期号）：**部分实施**（2026-10-22）—— M10 转译层已落地：`activity` 采样 + `episodes` 片段 + 专注度 + `bin/hub-activity`，`tests/verify_m10.sh` 18 项全过；**M11 画面语义层也已落地**（`bin/hub-vision`，把已存截屏读成类别，`tests/verify_m11.sh` 16 项全过）；§10 的五个待定项仍待拍板，L1-b「产出事件」与 actor 归属**还没做**
 - 输入：用户 m00001（闭环设计：原始记录→行为数据→信号判定→策略→推送）、m00005（委派：盘点剩余 + 补"数据到行为特征"的分析层）
 - 前置文档：`README.md`（现状与用法）、`PROJECT.md`（场景→用法→嵌入、分期、各期记录）、`INTERFACE.md`（契约）、`DELIVERY.md`（交付与未决项）
 - 落位：本文只是**设计草案**，尚未进 `INTERFACE.md`；实施时每节逐条落成契约 + `tests/verify_m9.sh` 起的机械验收。

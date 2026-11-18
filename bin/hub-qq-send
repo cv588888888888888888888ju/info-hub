@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# QQ 通道命令：发私聊/群消息、重推 pending、撤回。契约见 INTERFACE.md §11.7d。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -c 'import sys; from infohub.qq_send import main; sys.exit(main())' "$@"

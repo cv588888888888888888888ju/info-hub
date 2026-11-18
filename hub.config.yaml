@@ -147,6 +147,15 @@ collect:
     head_chars: 120
     max_frames: 40
     timeout_s: 10
+  qq:
+    enabled: true
+    ssh_host: root@<bridge-host>
+    spool_path: /opt/qq-relay/queue/events.jsonl
+    limit: 200
+    max_bytes: 4194304
+    timeout_s: 20
+    seen_keys_max: 500
+    include_self: false
 db: hub.db
 digest:
   command:
@@ -200,7 +209,8 @@ notify:
 phone_api:
   enabled: true
   # "::" = 双栈通配：IPv4 走 v4-mapped（WG 地址、局域网地址）+ IPv6 监听（家庭网络有公网 v6 时手机可直接打进来）
-  hosts: ["::"]
+  hosts:
+  - '::'
   # 对外可达（Cloudflare 隧道 / 家庭机 IPv6 中转）：本机地址都是内网，auto 检测不到公网
   exposure: public
   port: 8800
@@ -221,6 +231,10 @@ plugins:
   paths: []
   phone-mcp:
     enabled: true   # 手机投递通道（helper 通知）；不启用则 hub-phone-push 会报 no-channel
+  qq:
+    enabled: true
+  qq-onebot:
+    enabled: true
 redact:
   enabled: true
   max_digits: 10
@@ -308,3 +322,9 @@ vision:
     model: models/Qwen3-VL-2B-Q4_K_M.gguf
     threads: 2
     timeout_s: 60
+qq_onebot:
+  ssh_host: root@<bridge-host>
+  api: http://127.0.0.1:3000
+  token_file: /opt/qq-relay/onebot.token
+  spool_path: /opt/qq-relay/queue/events.jsonl
+  timeout_s: 25

@@ -1,0 +1,8 @@
+# 通道插件：QQ（OneBot v11，SnowLuma 后端）。契约 INTERFACE.md §11.7d。
+# 默认关：要显式 plugins.qq-onebot.enabled=true 才装机。
+name: qq-onebot
+kind: channel
+api: 1
+entry: channel.py:send
+default_enabled: false
+config_key: qq_onebot

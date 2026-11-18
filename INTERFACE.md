@@ -1,9 +1,9 @@
 # info-hub 接口契约（INTERFACE.md）
 
-- 版本：v1.0
-- 日期：2026-11-18
+> 期号 / 日期见 [PROJECT.md](PROJECT.md) 抬头（`pm-render.py` 自动生成）；本文不另立版本号，只跟期号走。
+
 - 设计依据：[PROJECT.md](PROJECT.md)。**可调数值一律只写在 `hub.config.yaml`**；本文只定义名字与语义，代码注释只写指向本文的指针，不抄数值、不抄语义。
-- 状态：**M18（当前实现）**。存储、事件总线、采集器、规则、通知、报表与控制台、插件宿主、投递台账、手机界面、派生层都已落在本文件；已淘汰或有边界的能力在对应小节标注。
+- 覆盖范围：存储、事件总线、采集器、规则、通知、报表与控制台、插件宿主、投递台账、手机界面、派生层都已落在本文件；已淘汰或有边界的能力在对应小节标注。
 
 ## 1. 范围
 
@@ -310,7 +310,7 @@ stdout（`--json`）：`{"run_at":…,"sources":{"<name>":{"ok":bool,"emitted":N
   `since_days`（M8 起默认 180，跟事件留存对齐）、`max_items`（**每类**上限：`repo`/`video`/`history` 各算）、
   `keep_ids`、`kinds`（M8 起默认 `[history]` ⇒ 全量历史；`repo`/`video` 仍在，见 §4.12）、
   `title_chars`（每条只留标题前 N 字，默认 120）。
-- `collect.qq.*`（2026-11-18）：`enabled`（默认 false）、`ssh_host`（默认 `root@<bridge-host>`，置空=本机执行同一条远端命令，供测试注入）、`remote_db`（默认 `/opt/qq-relay/qq_ingest.db`）、`remote_cmd`（默认远端 `python3 -c` 只读程序，收 `<db> <after_id> <limit>` 三参）、`limit`（每轮上限，默认 200）、`timeout_s`（默认 20）、`seen_keys_max`（去重键保留上限，默认 500）、`ssh_key`（预留；当前未实现，ssh 认证走本机 `~/.ssh/config` 与 agent）。清单 `default_enabled: false` ⇒ **还必须** `plugins.qq.enabled: true` 才被注册（见 §10 的开关优先级）。
+- `collect.qq.*`（2026-11-18 定型为 OneBot spool 版）：`enabled`（默认 false）、`ssh_host`（默认 `root@<bridge-host>`，置空=本机执行同一条远端命令，供测试注入）、`spool_path`（默认 `/opt/qq-relay/queue/events.jsonl`）、`remote_cmd`（默认远端 `python3 -c`，收 `<spool> <offset> <max_bytes>` 三参，返回 base64 字节块 + 文件大小）、`limit`（每轮上限，默认 200）、`max_bytes`（单轮最多读多少字节，默认 4 MiB）、`timeout_s`（默认 20）、`seen_keys_max`（去重键保留上限，默认 500）、`include_self`（是否收自己发的，默认 false）。清单 `default_enabled: false` ⇒ **还必须** `plugins.qq.enabled: true` 才被注册（见 §10 的开关优先级）。
 - `collect.phone-hub.*`（M15）：`enabled`（默认 true）、`ssh_host`（默认 `root@<wg-server-ip>`）、`ssh_key`（默认 `~/.ssh/id_ed25519`）、`ssh_proxy`（默认经本机 wireproxy 的 `ncat --proxy 127.0.0.1:11080 --proxy-type socks5 %h %p`）、`remote_cmd`（默认在 ECS 上跑 `hub_dump.py`）、`limit`（每轮最多取几条，默认 1000）、`head_chars`（标题/正文截断，默认 160）、`timeout_s`、`backoff_after` / `backoff_s`。**最终存储在个人服务器（家庭机 <bridge-host>）**：本机只存镜像，本采集器不联系手机，只从 ECS `hub.db` 按 `ts` 升序拉增量（`hub_dump.py` 必须 `WHERE ts > ? ORDER BY ts ASC`，否则游标会跳过历史）。
 - `redact.*`（M15 验证码脱敏，语义见 §4.21）：`enabled`（默认 **false** —— 缺这一段就是旧行为；随仓库的配置文件里已打开）、
   `mode`（只认 `mask`：正文整段换成占位符；其它值按配置非法处理）、`placeholder`（替换后的正文，默认 `[验证码类]`；
@@ -929,19 +929,30 @@ stdout（`--json`）：`{"run_at":…,"sources":{"<name>":{"ok":bool,"emitted":N
 
 **为什么不做常驻**：`enabled` 默认 false —— 手机不插线时它必然失败，混进 5 分钟 collect 轮只会每轮报错。
 
-### 4.24 QQ 消息镜像（2026-11-18 新增，路径 A）
+### 4.24 QQ 消息镜像（2026-11-18 定型：OneBot v11 事件 spool）
 
-数据源是家庭机 `<bridge-host>:/opt/qq-relay/qq_ingest.db` 的表 `n`：
-`id, ts, pkg, app, title, text, subtext, key, received_at`，远端已有 `UNIQUE(key)`。
-该库由 `/opt/qq-relay/qq_ingest.py`（qq-ingest.service）写入 —— **手机 QQ 的通知**经手机侧主动上传，不是 QQ 协议消息。
+数据源是家庭机 `<bridge-host>:/opt/qq-relay/queue/events.jsonl` —— 每行一条 OneBot v11 事件（JSON），
+由 `onebot-tap.service`（`/opt/qq-relay/onebot-tap.mjs`）从 SnowLuma 的 ws 服务
+`ws://127.0.0.1:3001` 实时跟写。SnowLuma 以注入方式挂在**真实 QQ 客户端**（`/opt/QQ`，账号「示例账号」，
+uin 10001）上，消息来源是 QQ 协议本身，因此**有群名、发送者、消息段**，不再只是通知栏那六条。
 
-- **过滤**：只取 `pkg='com.tencent.mobileqq'`；其他应用的通知留在远端库，不进 info-hub。
-- **读取**：ssh 到 `remote_host`（默认 `root@<bridge-host>`）执行 `remote_cmd`（默认一段只读 `python3 -c`：以 `file:<db>?mode=ro` 打开，`WHERE pkg=? AND id > ? ORDER BY id LIMIT ?`，打印 JSON 数组）。不 scp 整库、不写远端。
-- **双轴增量**：游标 = 自增 `id`（`collector_state.cursor.last_id`）；去重 = 通知 `key`（保留 `seen_keys` 最近 500 个）。只看 id 不够 —— 手机时钟会乱序、上游可能重放，必须两轴同时成立才入库。
-- **事件映射**：`ts`(ms) → 事件 `ts`(ISO8601 本地时区)；`payload` 六键与 phone-hub 同形 `{ts,pkg,app,title,text,key}`，`kind=notify`，`privacy=normal`；脱敏（§4.21）同样生效，先脱敏再算指纹。`subtext` 当前全 NULL，未入 payload。
-- **失效语义**：远端不可达 / 表缺列 / 超时 ⇒ `raise CollectorError`，宿主记 `sources.qq.ok=false` + `fail_streak`，采集轮整体退出码仍 `0`（§6）。
-- **测试注入**：`collect.qq.ssh_host` 置空 ⇒ 在本机跑同一条远端命令，`remote_db` 指向临时 sqlite fixture，测试不需要真 ssh。
-- **现状（2026-11-18 调研）**：该链路自 2026-10-10 起零新增（手机侧上传配置已不存在），库里只有 6 条 QQ 历史行；要「像微信那样收发」需要另一条协议机器人路径（NapCat/Lagrange + 独立小号），见 `docs/qq-source-recon.md`。
+- **过滤**：只看 `post_type=message`（meta/notice 丢弃）；默认跳过自己发的（`user_id == self_id`），
+  `include_self: true` 才收。**不按群/好友白名单过滤**（那属于派生层的事）。
+- **读取**：ssh 到 `collect.qq.ssh_host`（默认 `root@<bridge-host>`）执行 `remote_cmd`（默认一段
+  `python3 -c`：按 offset 读至多 max_bytes 字节、返回 base64 + 文件大小）。本地只吃**完整行**
+  （末尾无换行的那半行留到下轮），不 scp 整文件、不写远端。文件被轮转（size < offset）⇒ 从 0 重读。
+- **增量轴**：字节游标 `collector_state.cursor.offset`；去重键 = `qq:<message_id>`
+  （`seen_keys` 只留最近 `seen_keys_max` 个）。轮转/重放时靠 seen_keys 兜底。
+- **事件映射**：事件 `time`（秒）→ `payload.ts`（毫秒）；事件 ts 走 `E.iso()`（ISO8601 带时区）。
+  `payload` 六键与 phone-hub 同形：`app="qq"`、`pkg="qq.onebot"`、`title`=群名（群）或发送者 card/nickname（私聊）、
+  `text`=消息段拼出的可读正文（`[图片]`/`[表情]`/`[语音]`/`[视频]`/`[文件]`/`[聊天记录]`/`[卡片]` 占位，
+  `reply` 段忽略，`at` 段渲染 `@uin`）、`key`=去重键。`kind=notify`、`privacy=normal`；脱敏（§4.21）先行。
+- **失效语义**：spool 不可读 / 行不是 JSON 对象 / 缺 `message_id`/`time` / ssh 超时 ⇒ `raise CollectorError`，
+  宿主记 `sources.qq.ok=false` + `fail_streak`，采集轮退出码仍 `0`（§6）。恢复后 `fail_streak` 归 0。
+- **测试注入**：`collect.qq.ssh_host` 置空 ⇒ 本机跑同一条远端命令，`spool_path` 指向临时 fixture 即可。
+- **旧路径（已废）**：读 `/opt/qq-relay/qq_ingest.db` 的通知镜像自 2026-10-10 起零新增（手机侧上传配置已不存在），
+  代码已删除；取证与选型见 `docs/qq-source-recon.md`、`docs/qq-source-verify.md`。
+
 ## 5. 数据契约
 
 ### 5.1 `events`（append-only，**人不可改、机器不可改**）
@@ -1257,6 +1268,7 @@ info-hub/                     # 代码（工作区，入 git）
   plugins/derived/{activity,vision,calib,features,input,camera,screencast}/{plugin.yaml,<entry>.py}   # S17 环境/派生层
   plugins/channels/desktop-popup/{plugin.yaml,channel.py}
   plugins/channels/phone-mcp/{plugin.yaml,channel.py,layout.schema.json,README.md}   # S9 手机通道 + layout v1
+  plugins/channels/qq-onebot/{plugin.yaml,channel.py,README.md}                      # QQ 通道（OneBot v11）
   plugins/channels/dsh-ask/{package.json,index.mjs,selftest.mjs,README.md,cordis.patch.yml}   # S11 DSH 双弹插件（node）
   bin/{hub-collect,hub-store,hub-rules,hub-notify,hub-report,hub-ui,hub-digest,hub-digest-dsh,hub-digest-local,hub-week,hub-screencast,hub-history,hub-activity,hub-vision,hub-input,hub-calib,hub-features,hub-plugin,hub-deliver,hub-phone-push}
   packaging/info-hub-*.service  info-hub-*.timer
@@ -1366,7 +1378,8 @@ info-hub/                     # 代码（工作区，入 git）
 
 
 - S13（强推送两端）：[tests/check_strong_push.sh](tests/check_strong_push.sh) 11 项全 PASS、退出码 0（手机腿只建 `kind=strong` 的 pending 行；电脑腿把 zenity 返回值写成 `reply` + `status=replied`；`--no-reply` 只确认不写回复；`--phone` 只跑一条腿；`--dry-run` 不落库）。
-- QQ 采集（2026-11-18）：[tests/check_qq_source.sh](tests/check_qq_source.sh) 42 项全 PASS、退出码 0（首轮 3 条入库、二轮 0、游标回退+同 key 改正文仍 0、游标整行丢失重放 `skipped_duplicate` 正确、表缺列/远端不可达/超时三种失败都是 `rc=0` + `sources.qq.ok=false` + `fail_streak=1` 且错误信息取自 traceback **末行**（点名 `no such column` 等真因）、恢复后 `fail_streak=0`）。真实环境首轮 `ingested=6`、二轮 `0`、`rc=0`。
+- QQ 采集（2026-11-18 定型 OneBot spool 版）：[tests/check_qq_source.sh](tests/check_qq_source.sh) 76 项全 PASS、退出码 0（首轮只入 message 事件、自己发的不入、半行留到下轮、重复 message_id 只入一条、非文本段占位、轮转后 offset 归零且 seen_keys 去重、limit 小于积压量时逐轮补齐不跳行（T13）、spool 不存在/坏 JSON/超时三种失败都是 rc=0 + sources.qq.ok=false + fail_streak=1，恢复后归 0）。真实环境首轮 ingested=110、二轮 0、rc=0。
+- QQ 通道（2026-11-18 新增）：[tests/check_qq_channel.sh](tests/check_qq_channel.sh) 35 项全 PASS、退出码 0（通道未装提示、成功 delivered+message_id、Bearer 鉴权头、群消息/名字解析、后端拒绝留 pending+attempts+last_error、--pending 重推、--dismiss 走 delete_msg、--dry-run 不发请求、回复结算（自己发的不结算、重复跑幂等）、选项 2 记标签、入参错退出 2）。
 ## 9. 运行面（谁在跑、什么时候跑）
 部署 = systemd **user** 单元（无窗口、退出码透传给 systemd；见 `packaging/`，用 `bin/hub-install` 安装）：
 
@@ -1585,6 +1598,39 @@ jxev App 的 APK 里 `KEY_TEXT_REPLY` / `deliver_show` 出现 0 次 ⇒ 结构�
 - **与 §11.7 的关系**：`hub-phone-push --strong` 只发手机腿（走同一个 `reminder_show`，`transport=reminder`）；`hub-strong-push` 是两端编排。
 - **为什么不用系统通知**：GNOME 通知会滑走、可能被勿扰吞掉，不是「强」提醒；电脑腿必须是模态对话框（形状沿用本机 wx-popup-server 的 zenity 560 宽）。
 - **验收实证（2026-11-18）**：`hub-strong-push --title 强体系选项自检 --option 收到 --option 稍后` ⇒ `phone {shown:true, fullscreen:true, keyguard:false}`、`desktop {reply:"收到", option:"收到"}`；电脑 zenity 之前一版 `--entry` 曾把 `--entry-text` 占位文字当回复提交，已改成提示写在正文里。
+
+#### 11.7d QQ 通道（2026-11-18 新增：OneBot v11 发消息 + 回复回写）
+
+后端 = 家庭机上的 SnowLuma（注入真实 QQ 客户端），OneBot v11 的 HTTP 口 `127.0.0.1:3000`
+（ws 口 3001 只给事件 tap 用）。台账通道名 `qq`；插件 `plugins/channels/qq-onebot`（`default_enabled: false`，
+要 `plugins.qq-onebot.enabled: true`）。命令：
+
+- `bin/hub-qq-send --to <uin|群id|名字> [--group] --title … --body … [--options JSON] [--json] [--dry-run]`
+  建一行 `channel=qq` 的投递并发出去 ⇒ `status=delivered`、`remote_ref={"type","id","message_id"}`。
+  后端拒绝/不可达 ⇒ 行留 `pending` + `last_error` + `attempts=1`，**退出码 1**（账已记、没发出去，可重推）。
+- `bin/hub-qq-send --pending`：重推 `channel=qq` 的 pending 行（op=retry），返回 `{retried,delivered,failed}`。
+- `bin/hub-qq-send --dismiss <投递 id>`：OneBot `delete_msg` 撤回已发出的那条。
+- `bin/hub-qq-replies [--json] [--dry-run]`：读同一个事件 spool（自己的游标 `qq-replies`），
+  把对方回来的私聊/群消息结算成回复：有 options 时 `1..n` 或与 `label`/`key` 相等 ⇒ 记选项标签，
+  否则原样记自由文本；写 `status=replied` + `reply`（不改待办状态，同 §11.4）。
+
+| 配置键 | 缺省 | 语义 |
+|---|---|---|
+| `qq_onebot.enabled` | false | 通道装机闸（清单 `default_enabled: false` ⇒ 必须显式 true） |
+| `qq_onebot.ssh_host` | `root@<bridge-host>` | 置空 = 本机执行同一条远端命令（测试注入） |
+| `qq_onebot.api` | `http://127.0.0.1:3000` | OneBot HTTP 口（后端机视角） |
+| `qq_onebot.token_file` | `/opt/qq-relay/onebot.token` | **HTTP 适配器**的 access token 文件（0600，0600 在远端；ws 口另有 token） |
+| `qq_onebot.spool_path` | `/opt/qq-relay/queue/events.jsonl` | 事件 spool（采集器与回复结算共用） |
+| `qq_onebot.timeout_s` | 25 | 单次远端调用超时 |
+
+- **失败语义分两层**：远端鉴权/网络/接口错 ⇒ `PushError`（行留 pending，退出码 1）；入参错（缺 target、
+  目标类型不认识）⇒ `ChannelError`（退出码 2，库不变）。
+- **target 解析**：`--to` 既可给数字（uin / group_id），也可给好友备注/昵称/群名 ——
+  先找完全相等，再找包含匹配；歧义时取第一个完全相等。
+- **与 §11.7 / §11.7c 的分工**：QQ 是「聊天通道」（发出去进对方 QQ、回来的消息进台账）；
+  手机/电脑是「提醒通道」（弹窗要人当场看）。
+- **验收**：`tests/check_qq_channel.sh`（发送成功/失败留 pending/重推/撤回/回复结算/选项匹配/target 解析/通道未启用），
+  真机实证见 `docs/qq-source-verify.md`。
 
 ### 11.10 手机主页（phone_api + helper WebView）
 
