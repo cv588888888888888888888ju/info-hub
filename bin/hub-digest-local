@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# info-hub 本地确定性归纳后端（M4d）：读库直接产出 JSON 条目，不联网、零 token。语义见 INTERFACE.md §4.9。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m infohub.entry_digest_local "$@"

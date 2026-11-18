@@ -1,0 +1,9 @@
+# 视图插件：报表引擎（S15；契约见 INTERFACE.md §4.7 / §10）
+# 报表只读系统数据；digest / history 区块分别由 digest 视图插件与本体 history 模块渲染。
+name: report
+kind: view
+api: 1
+entry: report.py:generate
+default_enabled: true
+config_key: report
+bins: [hub-report]

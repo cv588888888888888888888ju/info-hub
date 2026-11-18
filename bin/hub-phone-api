@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# 手机主页接口（INTERFACE.md §11.10）：给手机 App 的 WebView 提供消息中心。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -c 'import sys; from infohub.phone_api import main; sys.exit(main())' "$@"

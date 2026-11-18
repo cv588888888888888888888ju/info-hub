@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# info-hub 强推送：手机全屏提醒 + 电脑桌面通知（同一条消息）。语义见 INTERFACE.md §11.7c。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m infohub.entry_strong "$@"

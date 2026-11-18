@@ -1,0 +1,7 @@
+# 来源插件：窗口快照（无障碍总线，只留应用名+标题）（S3 迁移；契约 INTERFACE.md §10）
+name: window
+kind: source
+api: 1
+entry: collector.py:collect
+default_enabled: true
+config_key: collect.window

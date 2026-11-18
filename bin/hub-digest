@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# info-hub 归纳层（M4b）：系统数据 → 可替换的加工层命令 → 带证据指针的条目。语义见 INTERFACE.md §4.9。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m infohub.entry_digest "$@"

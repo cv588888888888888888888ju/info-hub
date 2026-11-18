@@ -1,0 +1,9 @@
+# info-hub M1：规则引擎把事件加工成待办（不弹窗；board.enabled=false 时不碰看板）。
+[Unit]
+Description=info-hub 规则派生待办（M1）
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/文档/deepseek-harness/default-workspace/info-hub
+ExecStart=%h/文档/deepseek-harness/default-workspace/info-hub/bin/hub-rules --quiet derive
+TimeoutStartSec=300

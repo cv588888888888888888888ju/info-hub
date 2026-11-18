@@ -1,0 +1,1 @@
+{"dir": "project", "depth": 2, "allow": ["blocks", "blocks/*.md", "FEATURES.jsonl", "SURFACE.jsonl", "preamble.md"], "why": "项目书自身目录：只放块(blocks/*.md)、功能账、覆盖表、声明面与可选 preamble；别往这里丢临时文件"}

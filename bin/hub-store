@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# info-hub 存储查询/维护。语义见 INTERFACE.md §2.2。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m infohub.entry_store "$@"

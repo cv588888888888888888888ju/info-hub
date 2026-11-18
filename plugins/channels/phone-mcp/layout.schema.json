@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://info-hub.local/plugins/channels/phone-mcp/layout.schema.json",
+  "title": "phone-mcp layout v1",
+  "description": "手机投递卡片的整份界面 JSON（layout v1）。契约见 info-hub/INTERFACE.md §13；渲染纪律：未知键一律忽略，缺 title/body 回落投递行，缺 options 按 mode 给默认，整份 layout 为 NULL 时回落 {title, text=body}。本 schema 只做「形状 + 版本」校验，不做跨字段约束。",
+  "type": "object",
+  "required": ["v"],
+  "additionalProperties": true,
+  "properties": {
+    "v": {
+      "const": 1,
+      "description": "版本。当前只认 1；不认识的值 ⇒ 手机侧把整份 layout 当无效，回落标题+正文。"
+    },
+    "title": {
+      "type": "string",
+      "description": "卡片标题。缺省 ⇒ 用投递行的 title。"
+    },
+    "body": {
+      "type": "string",
+      "description": "卡片正文。缺省 ⇒ 用投递行的 body。"
+    },
+    "options": {
+      "type": "array",
+      "description": "可选项（按钮/多选列表）。缺省时按 mode 给默认：single/无 → 单按钮「知道了」；question → 单按钮「知道了」+ 回复输入框。",
+      "items": { "$ref": "#/$defs/option" }
+    },
+    "input": {
+      "$ref": "#/$defs/input"
+    },
+    "actions": {
+      "type": "array",
+      "description": "卡片底部的动作按钮（与 options 分开：options 是「回答」，actions 是「界面操作」，如提交回复）。缺省时手机侧按 options 画。",
+      "items": { "$ref": "#/$defs/action" }
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 带时区（例：2026-11-14T12:00:00+08:00）。到点手机侧收起卡片；台账由调用方置 expired。注意 format 在 JSON Schema 里默认只是注解，校验器需显式开启 format 检查。"
+    }
+  },
+  "$defs": {
+    "option": {
+      "type": "object",
+      "required": ["key"],
+      "additionalProperties": true,
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "稳定键，回执时原样回传并落库；现行取值 ack / done / snooze / ignore-kind / reply / open（不在此处枚举，便于前向兼容）。"
+        },
+        "label": {
+          "type": "string",
+          "description": "显示名，只用于画界面、不落库。"
+        },
+        "description": {
+          "type": "string",
+          "description": "选项的补充说明（灰字/小字）。"
+        }
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "false ⇒ 不画输入框；缺省视为 false（question 模式缺省另有默认，见 INTERFACE.md §13）。"
+        },
+        "placeholder": {
+          "type": "string",
+          "description": "输入框占位提示。"
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "required": ["key"],
+      "additionalProperties": true,
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "稳定动作键，回执时原样回传。"
+        },
+        "label": {
+          "type": "string",
+          "description": "按钮显示名。"
+        },
+        "style": {
+          "type": "string",
+          "enum": ["primary", "default", "destructive"],
+          "description": "按钮风格。取值由 INTERFACE.md §13 固定为这三种；新增风格需先改契约再改本 schema。"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "v": 1,
+      "title": "3 条待处理",
+      "body": "其中 1 条今天到期",
+      "options": [
+        { "key": "ack", "label": "知道了", "description": "只表示看见，不改待办状态" }
+      ],
+      "input": { "enabled": true, "placeholder": "回复…" },
+      "actions": [
+        { "key": "reply", "label": "发送", "style": "primary" }
+      ],
+      "expires_at": "2026-11-14T12:00:00+08:00"
+    }
+  ]
+}

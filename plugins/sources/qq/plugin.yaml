@@ -1,0 +1,8 @@
+# 来源插件：QQ 消息镜像（读服务器 qq-relay 通知库；契约 INTERFACE.md §4 采集器表 / §10 插件契约）
+# 默认关（default_enabled: false）：要显式 plugins.qq.enabled=true 才装机、collect.qq.enabled=true 才进 5 分钟轮。
+name: qq
+kind: source
+api: 1
+entry: collector.py:collect
+default_enabled: false
+config_key: collect.qq

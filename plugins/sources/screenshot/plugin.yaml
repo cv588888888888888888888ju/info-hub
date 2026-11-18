@@ -1,0 +1,7 @@
+# 来源插件：静默截屏（ScreenCast 取帧 + 元数据）（S3 迁移；契约 INTERFACE.md §10）
+name: screenshot
+kind: source
+api: 1
+entry: collector.py:collect
+default_enabled: true
+config_key: collect.screenshot

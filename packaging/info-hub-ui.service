@@ -1,0 +1,15 @@
+# info-hub M3：本地控制台（只绑 loopback；只读系统数据 + 手改报表留痕）。
+[Unit]
+Description=info-hub 本地控制台（M3）
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/文档/deepseek-harness/default-workspace/info-hub
+ExecStart=%h/文档/deepseek-harness/default-workspace/info-hub/bin/hub-ui --host 127.0.0.1 --port 8799
+Restart=always
+RestartSec=3
+TimeoutStopSec=10
+
+[Install]
+WantedBy=default.target

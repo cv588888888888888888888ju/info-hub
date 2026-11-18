@@ -1,0 +1,8 @@
+[Unit]
+Description=info-hub 归纳定时器（周日 23:30，在周报之前）
+[Timer]
+OnCalendar=Sun *-*-* 23:30:00
+Persistent=true
+AccuracySec=1min
+[Install]
+WantedBy=timers.target

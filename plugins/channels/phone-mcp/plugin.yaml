@@ -1,0 +1,7 @@
+# 通道插件：手机（S9；契约见同目录 README.md，INTERFACE 由 Lead 合并）
+name: phone-mcp
+kind: channel
+api: 1
+entry: channel.py:send
+default_enabled: false
+config_key: phone_remind

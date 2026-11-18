@@ -1,0 +1,6 @@
+# 派生插件：校准报告派生（原 src/infohub/calib.py）
+name: calib
+kind: derived
+api: 1
+entry: calib.py:report
+default_enabled: true

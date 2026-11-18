@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# info-hub 本地控制台（M3）。语义见 INTERFACE.md §2.6。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m infohub.entry_ui "$@"

@@ -1,0 +1,7 @@
+# 派生插件：摄像头朝向派生（原 src/infohub/camera.py）
+name: camera
+kind: derived
+api: 1
+entry: camera.py:sample
+default_enabled: true
+config_key: collect.camera

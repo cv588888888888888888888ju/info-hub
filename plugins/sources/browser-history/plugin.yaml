@@ -1,0 +1,7 @@
+# 来源插件：本机浏览器历史（只读 History 库）（S3 迁移；契约 INTERFACE.md §10）
+name: browser-history
+kind: source
+api: 1
+entry: collector.py:collect
+default_enabled: true
+config_key: collect.browser-history

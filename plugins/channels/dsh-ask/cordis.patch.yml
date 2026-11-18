@@ -1,0 +1,14 @@
+# info-hub dsh-ask 的装载块（S11）。手工装载方式与回滚见 INTERFACE.md §12.7；
+# 宿主的插件清单（hub-plugin list）只看 plugin.yaml，与本文件无关。
+# 路径是绝对路径：任务书要求「十年后的人只看这份文件也能装」。
+- insert:
+    - id: dsh-ask
+      name: 'file://$HUB_ROOT/plugins/channels/dsh-ask/index.mjs'
+      config:
+        enabled: true
+        hub_url: http://127.0.0.1:8799
+        phone_mcp_url: http://<bridge-host>:9500/mcp
+        hub_root: $HUB_ROOT
+        timeout_ms: 600000
+        poll_ms: 500
+        python: python3

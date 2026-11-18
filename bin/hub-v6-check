@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# hub-v6-check：这条机器现在能不能被 IPv6 打进来（跑在哪台就查哪台）。
+# 只读：不绑端口、不改配置。契约见 INTERFACE.md §11.10「外部可达地址」。
+set -uo pipefail
+echo "== 全局 IPv6 地址"
+ip -6 addr show scope global 2>/dev/null | grep -E "inet6" || echo "（无：内核没拿到全局 IPv6）"
+echo "== 默认 IPv6 路由"
+ip -6 route show default 2>/dev/null || true
+[ -z "$(ip -6 route show default 2>/dev/null)" ] && echo "（无：只有链路本地，出不去也进不来）"
+echo "== 本机 8800 是否在 IPv6 上听"
+ss -ltn 2>/dev/null | grep -E ':8800' || echo "（没监听）"
+echo "== IPv6 回环自测"
+curl -g -6 -s -m 3 -o /dev/null -w "  [::1]:8800 -> %{http_code}\n" -H "X-Hub-Token: ${HUB_TOKEN:-}" "http://[::1]:8800/api/messages?limit=1" 2>/dev/null || echo "  [::1]:8800 不通"
+echo "== 出站 IPv6 自测（能看到 v6 网站才算通）"
+curl -6 -s -m 6 -o /dev/null -w "  v6 outbound -> %{http_code}\n" http://[2400:3200::1]/ 2>/dev/null || echo "  v6 出站不通"
+echo "== 防火墙"
+if command -v firewall-cmd >/dev/null 2>&1 && firewall-cmd --state >/dev/null 2>&1; then
+  firewall-cmd --list-ports 2>/dev/null | tr ' ' '\n' | grep -E '^(1025-65535|8800)/tcp$' || echo "（8800 未单独放行，看上面的端口段）"
+else
+  echo "（firewalld 未运行）"
+fi

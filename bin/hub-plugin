@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# 插件宿主清单（S1）。语义见 INTERFACE.md §10。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m infohub.entry_plugin "$@"

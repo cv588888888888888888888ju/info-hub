@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# info-hub 静默截屏（M7）：一次性同意 / 立刻取帧 / 留存清理。语义见 INTERFACE.md §2.8、§4.13。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m infohub.entry_screencast "$@"

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# info-hub 画面语义层：把已存的截屏读成类别（不新增取帧）。语义见 INTERFACE.md §2.11。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m infohub.entry_vision "$@"

@@ -1,0 +1,8 @@
+[Unit]
+Description=info-hub 手机强提醒同步（推 open/doing 待办到手机常驻条）
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/文档/deepseek-harness/default-workspace/info-hub
+ExecStart=%h/文档/deepseek-harness/default-workspace/info-hub/bin/hub-phone-remind sync
+TimeoutStartSec=120

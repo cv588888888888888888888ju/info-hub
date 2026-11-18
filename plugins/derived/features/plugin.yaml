@@ -1,0 +1,7 @@
+# 派生插件：行为特征派生（原 src/infohub/features.py）
+name: features
+kind: derived
+api: 1
+entry: features.py:build
+default_enabled: true
+config_key: behavior

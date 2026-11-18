@@ -1,0 +1,9 @@
+# 通道插件：DSH 双弹（S11；契约见同目录 README.md 与 info-hub/INTERFACE.md §12）
+# runtime=node：宿主只校验 entry 文件存在，不 import（src/infohub/plugin.py 的 runtime=node 分支）。
+name: dsh-ask
+kind: channel
+api: 1
+runtime: node
+entry: index.mjs:apply
+default_enabled: false
+config_key: dsh-ask

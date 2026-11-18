@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# 把 info-hub 装成"真在跑"的常驻系统（systemd user 单元）。
+#
+# 干什么：
+#   1. 把 packaging/*.service|*.timer 拷到 ~/.config/systemd/user/
+#   2. daemon-reload
+#   3. enable --now 七个定时器 + 控制台
+# 不干什么：
+#   - 不碰 info-hub-notify.*（通知默认关；等 AGENTS.md §一 例外条文逐字确认后才开）
+#   - 不发任何通知、不弹窗（本脚本自己也不弹）
+#
+# 用法：bin/hub-install [--with-notify] [--dry-run]
+# 退出码：0 成功；1 有失败；2 用法错。
+set -u
+
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+UNIT_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
+
+WITH_NOTIFY=0
+DRY_RUN=0
+for arg in "$@"; do
+  case "$arg" in
+    --with-notify) WITH_NOTIFY=1 ;;
+    --dry-run) DRY_RUN=1 ;;
+    -h|--help) sed -n '2,20p' "${BASH_SOURCE[0]}"; exit 0 ;;
+    *) echo "用法: hub-install [--with-notify] [--dry-run]" >&2; exit 2 ;;
+  esac
+done
+
+run() {
+  if [ "$DRY_RUN" = 1 ]; then echo "[dry-run] $*"; else "$@"; fi
+}
+
+rc=0
+mkdir -p "$UNIT_DIR"
+for f in "$PROJECT_DIR"/packaging/info-hub-*.service "$PROJECT_DIR"/packaging/info-hub-*.timer; do
+  name="$(basename "$f")"
+  case "$name" in
+    info-hub-notify.*)
+      if [ "$WITH_NOTIFY" != 1 ]; then echo "跳过 $name（通知未启用；要装请显式 --with-notify）"; continue; fi
+      ;;
+  esac
+  if [ -f "$UNIT_DIR/$name" ] && cmp -s "$f" "$UNIT_DIR/$name"; then
+    echo "未变 $name"
+  else
+    run cp "$f" "$UNIT_DIR/$name" && echo "已装 $name"
+  fi
+done
+
+run systemctl --user daemon-reload || rc=1
+
+units=(info-hub-collect.timer info-hub-activity.timer info-hub-derive.timer info-hub-report.timer info-hub-digest.timer info-hub-week.timer info-hub-prune.timer info-hub-ui.service info-hub-input.service)
+if [ "$WITH_NOTIFY" = 1 ]; then units+=(info-hub-notify.service); fi
+for u in "${units[@]}"; do
+  # dry-run 下不会真的拷，所以判"缺"要同时看安装目录与 packaging/：两边都没有才算真缺。
+  if [ ! -f "$UNIT_DIR/$u" ] && [ ! -f "$PROJECT_DIR/packaging/$u" ]; then
+    echo "缺单元 $u（跳过）" >&2; rc=1; continue
+  fi
+  run systemctl --user enable --now "$u" || rc=1
+done
+
+echo
+echo "=== 定时器状态 ==="
+if [ "$DRY_RUN" = 1 ]; then echo "[dry-run] systemctl --user list-timers 'info-hub-*'"; else systemctl --user list-timers 'info-hub-*' --all || rc=1; fi
+exit "$rc"

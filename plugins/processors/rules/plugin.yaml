@@ -1,0 +1,7 @@
+# 加工插件：规则引擎（S14；契约见 INTERFACE.md §4.5 / §10）
+name: rules
+kind: processor
+api: 1
+entry: rules.py:derive
+default_enabled: true
+config_key: rules

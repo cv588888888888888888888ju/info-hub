@@ -1,0 +1,18 @@
+# info-hub M2b：监听系统通知的动作回调（用户点了通知上的按钮 → 回写待办状态）。
+# 说明：
+#   - 只在 notify.enabled=true 时才有意义（默认 false，等 AGENTS.md §一 例外条文逐字确认后才开）；
+#   - 无窗口（systemd user 单元，不弹任何东西）；
+#   - 安装：cp 到 ~/.config/systemd/user/ 然后 systemctl --user enable --now info-hub-notify
+[Unit]
+Description=info-hub 通知动作回调（M2b）
+After=graphical-session.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/文档/deepseek-harness/default-workspace/info-hub
+ExecStart=%h/文档/deepseek-harness/default-workspace/info-hub/bin/hub-notify --quiet listen
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

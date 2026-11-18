@@ -1,0 +1,10 @@
+{"id": "F-201", "summary": "事件规范化与指纹", "code": ["src/infohub/events.py::make_event"], "tests": ["tests/verify_m0.sh"], "since": "2026-10-15", "commit": "2c513a2", "status": "active"}
+{"id": "F-202", "summary": "行为与时长特征", "code": ["src/infohub/features.py::build"], "tests": ["tests/verify_m10.sh"], "since": "2026-10-15", "commit": "7e2e7eb", "status": "active"}
+{"id": "F-203", "summary": "报表生成", "code": ["src/infohub/report.py::generate"], "tests": ["tests/verify_m11.sh"], "since": "2026-10-16", "commit": "d880515", "status": "active"}
+{"id": "F-204", "summary": "报表改动留痕", "code": ["src/infohub/report.py::revisions"], "tests": ["tests/verify_m11.sh"], "since": "2026-10-16", "commit": "d880515", "status": "active"}
+{"id": "F-205", "summary": "规则判定与候选", "code": ["src/infohub/rules.py::analyze"], "tests": ["tests/verify_m12.sh"], "since": "2026-10-16", "commit": "d880515", "status": "active"}
+{"id": "F-206", "summary": "系统通知发送", "code": ["src/infohub/notify.py::send"], "tests": ["tests/verify_m4a.sh"], "since": "2026-10-16", "commit": "18f3162", "status": "active"}
+{"id": "F-207", "summary": "通知节流抑制", "code": ["src/infohub/notify.py::suppress"], "tests": ["tests/verify_m2c.sh"], "since": "2026-10-16", "commit": "18f3162", "status": "active"}
+{"id": "F-208", "summary": "浏览历史分类", "code": ["src/infohub/history.py::classify"], "tests": ["tests/verify_m5b.sh"], "since": "2026-10-16", "commit": "d880515", "status": "active"}
+{"id": "F-209", "summary": "周归纳", "code": ["src/infohub/week.py::build"], "tests": ["tests/verify_week.sh"], "since": "2026-10-15", "commit": "72559cc", "status": "active"}
+{"id": "F-210", "summary": "摘要输入构建", "code": ["src/infohub/digest.py::build_input"], "tests": ["tests/verify_m4d.sh"], "since": "2026-10-16", "commit": "8bf08c4", "status": "active"}

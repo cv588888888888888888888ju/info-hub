@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# M16 行为特征层：一小时一行的关于人的指标。契约见 INTERFACE.md §2.14。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m infohub.entry_features "$@"

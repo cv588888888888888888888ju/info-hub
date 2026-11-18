@@ -1,0 +1,14 @@
+# info-hub M10：采一条活跃采样（在场/离开 + 窗口集合哈希）→ 入库。
+# 独立 1 分钟一轮：**不进** 5 分钟的 collect 轮，否则片段分辨率被拉到 5 分钟（INTERFACE.md §3）。
+# 无窗口；探针失败 = 1（不落半条），其余 = 0。
+[Unit]
+Description=info-hub 活跃采样（M10，每 1 分钟）
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+Environment=WAYLAND_DISPLAY=wayland-0
+Environment=DISPLAY=:0
+WorkingDirectory=%h/文档/deepseek-harness/default-workspace/info-hub
+ExecStart=%h/文档/deepseek-harness/default-workspace/info-hub/bin/hub-activity --quiet sample
+TimeoutStartSec=30

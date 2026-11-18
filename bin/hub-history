@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# hub-history：浏览历史分类与总结（M8）。语义见 INTERFACE.md §2.9 / §4.14。
+set -euo pipefail
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$HERE/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m infohub.entry_history "$@"

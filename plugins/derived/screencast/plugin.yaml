@@ -1,0 +1,7 @@
+# 派生插件：截屏派生（原 src/infohub/screencast.py）
+name: screencast
+kind: derived
+api: 1
+entry: screencast.py:grab
+default_enabled: true
+config_key: collect.screenshot
