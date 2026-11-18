@@ -1,0 +1,8 @@
+# 视图插件：归纳层（S15；契约见 INTERFACE.md §4.9 / §10）
+name: digest
+kind: view
+api: 1
+entry: digest.py:run
+default_enabled: true
+config_key: digest
+bins: [hub-digest, hub-digest-dsh, hub-digest-local]

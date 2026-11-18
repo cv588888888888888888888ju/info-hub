@@ -1,0 +1,310 @@
+behavior:
+  day_start_min_s: 600
+  def_version: ep-3
+  feat_version: feat-1
+  focus_weights:
+    continuity: 0.2
+    presence: 0.5
+    stability: 0.3
+  gap_s: 300
+  heartbeat_s: 900
+  idle_active_s: 180
+  min_active_s: 60
+  phone_game_exclude_min: 30
+  switch_per_min_full: 1.0
+board:
+  base_url: ''
+  column: backlog
+  enabled: false
+  endpoint: /api/task-board/action
+  origin: ''
+  permission: read-only
+  timeout_s: 10
+bus: state/bus.jsonl
+collect:
+  activity:
+    enabled: false
+    head_chars: 120
+    interval_s: 60
+    max_frames: 40
+    timeout_s: 10
+  bilibili:
+    command: []
+    enabled: false
+    input: ''
+    keep_ids: 1000
+    kind: favorite
+    max_items: 100
+    source: command
+    timeout_s: 60
+  browser-history:
+    browser: edge
+    db: ''
+    enabled: true
+    keep_ids: 40000
+    kinds:
+    - history
+    max_items: 20000
+    profile: Profile 1
+    since_days: 180
+    title_chars: 120
+  camera:
+    enabled: true
+    index: 0
+    min_face_ratio: 0.05
+    model: models/yunet-2023mar.onnx
+    yaw_max: 0.25
+  clipboard:
+    args:
+    - -n
+    backoff_after: 3
+    backoff_s: 900
+    command: wl-paste
+    enabled: true
+    max_chars: 2000
+    timeout_s: 5
+  dsh-session:
+    enabled: true
+    head_chars: 200
+    max_sessions: 60
+    tail_events_per_session: 400
+    timeout_s: 20
+  fs:
+    enabled: true
+    ignore_dirs:
+    - .git
+    - node_modules
+    - __pycache__
+    - .venv
+    - venv
+    - .mypy_cache
+    - .pytest_cache
+    - dist
+    - build
+    - target
+    - .cache
+    ignore_globs:
+    - '*.pyc'
+    - '*.log'
+    - '*.tmp'
+    - '*.db'
+    - '*.db-wal'
+    - '*.db-shm'
+    - '*.zstd'
+    max_files: 50
+    roots:
+    - ~/Documents   # 想盯哪儿就换成你自己的目录
+    timeout_s: 20
+  input:
+    enabled: true
+    window_s: 60
+  phone-hub:
+    # 可选：从一台自己可控的机器上拉手机中转库（需要 ssh 免密）。默认关。
+    backoff_after: 3
+    backoff_s: 600
+    enabled: false
+    head_chars: 160
+    limit: 1000
+    remote_cmd: cd /opt/hub-remote && python3 hub_dump.py
+    ssh_host: user@your-host
+    ssh_key: ~/.ssh/id_ed25519
+    ssh_proxy: ''
+    timeout_s: 30
+  phone-usage:
+    adb: adb
+    # 需要手机插 USB 且 adb 可用；没有就整条跳过，不影响别的采集器。默认关。
+    enabled: false
+    games:
+    - kajfosz.antimatterdimensions
+    - com.tencent.tmgp
+    - com.miHoYo.
+    - com.supercell.
+    interval_s: 1800
+    serial: ''
+    timeout_s: 60
+    top_n: 15
+  screenshot:
+    backend: screencast
+    capture_timeout_s: 20
+    command: []
+    consent_timeout_s: 300
+    dir: ''
+    enabled: true
+    head_chars: 120
+    idle_max_s: 60
+    idle_min_s: 3
+    interval_s: 300
+    jpeg_quality: 80
+    keep_days: 7
+    max_width: 1280
+    pause_wait_s: 20
+    require_active: true
+    token_file: ''
+  study:
+    enabled: true
+    log_path: ''   # 留空 = 不采集学习记录
+    timeout_s: 5
+  window:
+    enabled: true
+    head_chars: 120
+    max_frames: 40
+    timeout_s: 10
+db: hub.db
+digest:
+  command:
+  - bin/hub-digest-local
+  - --window-days
+  - '7'
+  enabled: true
+  local:
+    evidence_per_item: 3
+  max_events: 200
+  max_items: 6
+  max_todos: 30
+  timeout_s: 120
+  todo_evidence_events: 40
+  window_days: 7
+log_dir: logs
+log_name: hub.log
+notify:
+  actions:
+  - 打开
+  - 稍后
+  - 忽略此类
+  app_name: info-hub
+  backend: gdbus
+  command: []
+  dnd_source: gsettings
+  downshift_max_per_day: 1
+  downshift_min_samples: 5
+  downshift_threshold: 0.5
+  effectiveness_window_days: 14
+  enabled: false
+  idle_max_s: 60
+  idle_source: mutter
+  ignore_after_hours: 24
+  max_per_day_per_kind: 3
+  max_per_dispatch: 1
+  max_per_hour: 6
+  min_interval_s: 60
+  open_command:
+  - xdg-open
+  - '{url}'
+  open_timeout_s: 5
+  open_url: http://127.0.0.1:8799/
+  require_ui_event: true
+  respect_dnd: true
+  send_timeout_s: 15
+  snooze_minutes: 60
+  summary: info-hub
+  suppress_days: 7
+  timeout_ms: 8000
+phone_api:
+  enabled: true
+  # "::" = 双栈通配：IPv4 走 v4-mapped（WG 地址、局域网地址）+ IPv6 监听（家庭网络有公网 v6 时手机可直接打进来）
+  hosts: ["127.0.0.1"]   # 局域网/隧道自己加：["::"] 或 ["<hub-host>","192.168.1.5"]
+  # 对外可达（Cloudflare 隧道 / 家庭机 IPv6 中转）：本机地址都是内网，auto 检测不到公网
+  exposure: lan
+  port: 8800
+  # 留空 = 首次启动自动生成到 $HUB_ROOT/phone_api.token（0600）
+  token: ''
+phone_remind:
+  adb: adb
+  adb_timeout_s: 15
+  backend: bridge
+  bridge: http://<bridge-host>:9500/mcp
+  device: <serial>
+  helper_activity: com.chenty.hubreplier/.HubActivity
+  # 留空 = 跟随 phone_api 的 token（$HUB_ROOT/phone_api.token）
+  helper_token: ''
+  helper_transport: activity
+  timeout_s: 30
+plugins:
+  paths: []
+redact:
+  enabled: true
+  max_digits: 10
+  min_digits: 4
+  mode: mask
+  patterns_version: rd-1
+  placeholder: '[验证码类]'
+  window_chars: 24
+report:
+  blocks:
+  - stats
+  - todos
+  - notifications
+  - digest
+  - history
+  diff_max_chars: 4000
+  history_days: 1
+  name: hub-report
+  notifications_limit: 10
+  revisions_show: 20
+  todos_limit: 30
+reports_dir: reports
+retention_days: 180
+root: ~/.dsh/info-hub
+rules:
+  bili-unintegrated:
+    cache_days: 30
+    enabled: true
+    kb_root: ~/knowledge_base
+    name_min_len: 4
+    scan_limit: 20000
+    window_days: 14
+  clipboard-domain-repeat:
+    enabled: true
+    min_count: 3
+    scan_limit: 20
+  fs-repeat:
+    enabled: true
+    min_count: 3
+    scan_limit: 5000
+    window_hours: 24
+  session-stale:
+    enabled: true
+    scan_limit: 20000
+    settled_kinds:
+    - turn/end
+    stale_hours: 48
+  study-stale:
+    enabled: true
+    scan_limit: 200
+    stale_days: 7
+sessions_root: ~/.dsh/sessions
+ui:
+  assets:
+    cache_s: 5
+    enabled: true
+    list_limit: 60
+    max_bytes: 33554432
+    max_scan: 3000
+    roots: []
+    thumb_cache: 64
+    thumb_quality: 72
+    thumb_width: 360
+  enabled: true
+  host: 127.0.0.1
+  max_body_bytes: 262144
+  port: 8799
+  quiet_access_log: true
+vision:
+  enabled: true
+  engine: rapidocr
+  keep_raw: false
+  max_per_run: 8
+  min_hits: 2
+  retention_text_days: 7
+  threads: 4
+  vlm:
+    bin_dir: vendor/llama-b11840
+    ctx_size: 512
+    enabled: true
+    jpeg_quality: 75
+    max_per_run: 4
+    max_width: 512
+    mmproj: models/mmproj-Qwen3-VL-2B-F16.gguf
+    model: models/Qwen3-VL-2B-Q4_K_M.gguf
+    threads: 2
+    timeout_s: 60

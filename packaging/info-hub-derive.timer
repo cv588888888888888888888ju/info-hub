@@ -1,0 +1,8 @@
+[Unit]
+Description=info-hub 派生定时器（每 15 分钟）
+[Timer]
+OnCalendar=*:0/15
+Persistent=true
+AccuracySec=1min
+[Install]
+WantedBy=timers.target

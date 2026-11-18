@@ -1,0 +1,9 @@
+# 视图插件：看板出口（S15；协议见 skill dsh-task-board，契约 INTERFACE.md §5.4 / §10）
+# 注意两层开关不是一回事：本插件 default_enabled=true 表示「装得上、board-sync 命令可用」；
+# 真推不推卡由 board.enabled（默认 false）在 board.sync 里判（verify_m1 T7）。
+name: board
+kind: view
+api: 1
+entry: board.py:sync
+default_enabled: true
+config_key: board

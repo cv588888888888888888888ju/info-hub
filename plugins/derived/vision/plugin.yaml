@@ -1,0 +1,7 @@
+# 派生插件：画面语义派生（原 src/infohub/vision.py）
+name: vision
+kind: derived
+api: 1
+entry: vision.py:run
+default_enabled: true
+config_key: vision

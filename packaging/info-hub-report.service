@@ -1,0 +1,10 @@
+# info-hub M3：重写报表里的自动区块（人的手写内容逐字保留，未变不留痕）。
+# digest.enabled=false 时不含归纳区块（归纳要外部模型命令）。
+[Unit]
+Description=info-hub 重写报表自动区块（M3）
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/文档/deepseek-harness/default-workspace/info-hub
+ExecStart=%h/文档/deepseek-harness/default-workspace/info-hub/bin/hub-report --quiet generate
+TimeoutStartSec=120

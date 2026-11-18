@@ -1,0 +1,35 @@
+{
+  "name": "info-hub-dsh-ask",
+  "version": "0.1.0",
+  "private": true,
+  "description": "info-hub 通道插件：DSH user-questions/request 瀑布上的双弹（DSH 卡片 + 手机卡片，先到先得）。契约见 INTERFACE.md §12。",
+  "type": "module",
+  "main": "index.mjs",
+  "files": [
+    "index.mjs",
+    "ledger.py",
+    "plugin.yaml",
+    "cordis.patch.yml",
+    "README.md",
+    "selftest.mjs"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "keywords": [
+    "info-hub",
+    "dsh-plugin",
+    "deepseek-harness",
+    "channel",
+    "user-questions"
+  ],
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "test": "node selftest.mjs"
+  },
+  "license": "MIT"
+}

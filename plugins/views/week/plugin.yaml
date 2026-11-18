@@ -1,0 +1,8 @@
+# 视图插件：周报（S15；契约见 INTERFACE.md §4.10 / §10）
+# 周报没有自己的配置前缀（只读 reports_dir，周界由 --weeks/--week-of 决定）⇒ 不写 config_key。
+name: week
+kind: view
+api: 1
+entry: week.py:run
+default_enabled: true
+bins: [hub-week]

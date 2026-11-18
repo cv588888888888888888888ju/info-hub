@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# info-hub 加工层：规则 → 待办 → 看板。语义见 INTERFACE.md §2.3。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m infohub.entry_rules "$@"

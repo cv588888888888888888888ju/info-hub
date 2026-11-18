@@ -1,0 +1,11 @@
+# info-hub：按 retention_days（默认 180 天）清掉过期事件；同时按 screenshot.keep_days（默认 7 天）清掉截屏图。
+[Unit]
+Description=info-hub 过期事件清理（保留期见配置）
+After=info-hub-report.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/文档/deepseek-harness/default-workspace/info-hub
+ExecStart=%h/文档/deepseek-harness/default-workspace/info-hub/bin/hub-store prune
+ExecStart=%h/文档/deepseek-harness/default-workspace/info-hub/bin/hub-screencast prune
+TimeoutStartSec=300

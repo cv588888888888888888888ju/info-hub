@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# 取当前 Cloudflare quick tunnel 的地址（供手机 helper 的 urls 候选、或临时 curl 用）。
+# 隧道由 systemd user unit info-hub-tunnel.service 常驻，日志在 ~/.dsh/info-hub/logs/tunnel.log。
+# 契约：INTERFACE.md §11.10「外部可达地址」。
+set -euo pipefail
+LOG="${HUB_TUNNEL_LOG:-$HOME/.dsh/info-hub/logs/tunnel.log}"
+if [ ! -f "$LOG" ]; then
+  echo "fatal: 没有隧道日志 $LOG（systemctl --user status info-hub-tunnel.service 看状态）" >&2
+  exit 2
+fi
+URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' "$LOG" | tail -1 || true)
+if [ -z "$URL" ]; then
+  echo "fatal: 日志里没有 trycloudflare 地址（隧道还没起来？）" >&2
+  exit 3
+fi
+printf '%s\n' "$URL"

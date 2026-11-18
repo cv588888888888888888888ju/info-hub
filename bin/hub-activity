@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# info-hub 转译层：什么时候在干活 / 多久 / 专注度。语义见 INTERFACE.md §2.10。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m infohub.entry_activity "$@"

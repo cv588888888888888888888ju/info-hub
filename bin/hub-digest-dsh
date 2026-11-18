@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""M4b 的一个**现成加工层后端**：把提示词丢给一个 DSH 会话，把它的回复当归纳结果。
+
+为什么用它当默认例子：本机已经有 DSH（会话 = 一个 LLM），不必再引一家厂商 API；
+`dsh-filebridge` 的 `drop` / `result` 子命令就是现成的「发消息 → 等回复」通道。
+换模型 = 换本脚本（或换 `digest.command` 指向别的命令），info-hub 本体不认识任何厂商。
+
+用法（提示词走 stdin，回复走 stdout）：
+  bin/hub-digest-dsh --session <session-id> [--bridge <dsh-bridge 路径>] [--timeout 300]
+
+纪律：任何失败都**打到 stderr 并退出非 0**——info-hub 会把它折成「不写库」，
+绝不把半截文本当归纳结果。
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+import sys
+import time
+
+DEFAULT_BRIDGE = "dsh-bridge"
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="hub-digest-dsh", description="M4b 加工层：DSH 会话后端")
+    parser.add_argument("--session", required=True, help="目标 DSH 会话 id")
+    parser.add_argument("--bridge", default=DEFAULT_BRIDGE)
+    parser.add_argument("--timeout", type=int, default=300)
+    parser.add_argument("--poll", type=float, default=3.0)
+    args = parser.parse_args(argv)
+
+    prompt = sys.stdin.read()
+    if not prompt.strip():
+        print("空提示词，拒绝调用", file=sys.stderr)
+        return 2
+    command_id = f"info-hub-digest-{int(time.time())}-{abs(hash(prompt)) % 10 ** 6:06d}"
+    try:
+        drop = subprocess.run([args.bridge, "drop", "--session", args.session, "--text", prompt,
+                               "--timeout", str(args.timeout), "--id", command_id],
+                              capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        print(f"调用 dsh-bridge drop 失败：{exc}", file=sys.stderr)
+        return 1
+    if drop.returncode != 0:
+        print(f"dsh-bridge drop 退出码 {drop.returncode}：{drop.stderr.strip()[:300]}", file=sys.stderr)
+        return 1
+
+    try:
+        got = subprocess.run([args.bridge, "result", command_id, "--wait",
+                              "--timeout", str(args.timeout)],
+                             capture_output=True, text=True, timeout=args.timeout + 60)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        print(f"等结果失败：{exc}", file=sys.stderr)
+        return 1
+    if got.returncode != 0:
+        print(f"dsh-bridge result 退出码 {got.returncode}：{got.stderr.strip()[:300]}", file=sys.stderr)
+        return 1
+    try:
+        payload = json.loads(got.stdout[got.stdout.find("{"):got.stdout.rfind("}") + 1])
+    except ValueError as exc:
+        print(f"认不出 dsh-bridge result 的输出：{exc}", file=sys.stderr)
+        return 1
+    result = payload.get("result") or payload
+    if result.get("status") != "ok" or not (result.get("reply_text") or "").strip():
+        print(f"会话没给出可用回复：status={result.get('status')} "
+              f"error={result.get('error')} turn={result.get('turn_reason')}", file=sys.stderr)
+        return 1
+    print(result["reply_text"])
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

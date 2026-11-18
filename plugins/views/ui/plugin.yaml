@@ -1,0 +1,9 @@
+# 视图插件：本地控制台（S16；契约见 INTERFACE.md §4.8 / §10）
+# 只读系统数据 + 收投递 ack/reply + 可手改报表；server 用 serve()，绑 loopback。
+name: ui
+kind: view
+api: 1
+entry: ui.py:serve
+default_enabled: true
+config_key: ui
+bins: [hub-ui]

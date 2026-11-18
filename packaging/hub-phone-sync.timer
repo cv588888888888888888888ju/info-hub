@@ -1,0 +1,10 @@
+[Unit]
+Description=info-hub 手机强提醒同步（每 30 分钟）
+
+[Timer]
+OnCalendar=*:0/30
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

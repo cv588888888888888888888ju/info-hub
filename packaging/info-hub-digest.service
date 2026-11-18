@@ -1,0 +1,9 @@
+# info-hub M4d：每周归纳（归纳层照 digest.command 走；本地后端不联网、零 token）。
+[Unit]
+Description=info-hub 归纳层（M4d，每周）
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/文档/deepseek-harness/default-workspace/info-hub
+ExecStart=%h/文档/deepseek-harness/default-workspace/info-hub/bin/hub-digest --quiet run --window-days 7
+TimeoutStartSec=300

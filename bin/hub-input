@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# M13 输入节奏：键盘鼠标计数（不读内容）。契约见 INTERFACE.md §2.12 / §4.18。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m infohub.entry_input "$@"

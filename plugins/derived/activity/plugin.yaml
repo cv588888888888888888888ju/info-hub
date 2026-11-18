@@ -1,0 +1,7 @@
+# 派生插件：活跃采样派生（原 src/infohub/activity.py）
+name: activity
+kind: derived
+api: 1
+entry: activity.py:collect
+default_enabled: true
+config_key: collect.activity

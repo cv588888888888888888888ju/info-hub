@@ -1,0 +1,15 @@
+[Unit]
+Description=info-hub M13 输入节奏采样（键盘鼠标计数，只在本机）
+After=graphical-session.target
+
+[Service]
+Type=simple
+# systemd --user 不支持 SupplementaryGroups ⇒ 用 sg 切到 input 组（用户在 /etc/group 里即可）
+ExecStart=/usr/bin/sg input -c "%h/文档/deepseek-harness/default-workspace/info-hub/bin/hub-input --quiet listen"
+Restart=on-failure
+RestartSec=10
+Nice=10
+TimeoutStopSec=15
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,15 @@
+# info-hub M0：采集一轮（窗口焦点/剪贴板/DSH 会话/工作区文件变动）→ 入库。
+# M2f 触发面：`--notify` 只在**这一轮真收进了新的 window 事件**时才评估一次通知
+#   （定时的只是采集，不是推送；开关仍看 notify.enabled，默认 false）。
+# 无窗口；退出码透传给 systemd（配置或存储致命 = 1，其余 = 0）。
+[Unit]
+Description=info-hub 采集一轮（M0）
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+Environment=WAYLAND_DISPLAY=wayland-0
+Environment=DISPLAY=:0
+WorkingDirectory=%h/文档/deepseek-harness/default-workspace/info-hub
+ExecStart=%h/文档/deepseek-harness/default-workspace/info-hub/bin/hub-collect --once --notify
+TimeoutStartSec=120

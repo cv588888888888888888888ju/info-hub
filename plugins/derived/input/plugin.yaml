@@ -1,0 +1,7 @@
+# 派生插件：键鼠节奏派生（原 src/infohub/inputs.py；公开入口是 Sampler 类，无 collect/sample 函数）
+name: input
+kind: derived
+api: 1
+entry: inputs.py:Sampler
+default_enabled: true
+config_key: collect.input

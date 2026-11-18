@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# info-hub 手机强提醒通道（顶部常驻条 / 锁屏全屏页）。语义见 INTERFACE.md §2.7b。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m infohub.entry_remind "$@"

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# 投递台账命令（S4）：建投递行 / 列 / 确认 / 回复。语义见 INTERFACE.md §11。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -c 'import sys; from infohub.cli import main_deliver; sys.exit(main_deliver())' "$@"

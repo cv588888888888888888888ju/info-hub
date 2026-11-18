@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# phone-mcp 通道命令（S9）：推一条投递到手机 / 重推 pending / 收回卡片。契约见 INTERFACE.md §11.6。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -c 'import sys; from infohub.phone_push import main_phone_push; sys.exit(main_phone_push())' "$@"

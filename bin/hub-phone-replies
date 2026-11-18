@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# 手机 helper 回执同步（INTERFACE.md §11.7b）。语义见 src/infohub/phone_replies.py。
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PYTHONPATH="$here/../src${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -c 'import sys; from infohub.phone_replies import main; sys.exit(main())' "$@"

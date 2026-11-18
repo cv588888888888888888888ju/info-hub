@@ -1,0 +1,7 @@
+# 通道插件：电脑弹窗（S7；契约见同目录 README.md，INTERFACE 由 Lead 合并）
+name: desktop-popup
+kind: channel
+api: 1
+entry: channel.py:send
+default_enabled: true
+config_key: notify

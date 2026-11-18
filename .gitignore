@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+build/
+*.apk
+*.idsig
+hub.db
+hub.db-wal
+hub.db-shm
+state/
+reports/
+logs/
+*.log
+.venv/

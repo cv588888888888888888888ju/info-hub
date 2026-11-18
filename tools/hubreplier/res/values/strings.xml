@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">hubreplier</string>
+    <string name="reply_label">回复</string>
+    <string name="channel_name">info-hub 可回复通知</string>
+    <string name="channel_desc">info-hub 投递到手机、可在通知栏直接回复的消息</string>
+</resources>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.chenty.hubreplier"
+    android:versionCode="1"
+    android:versionName="0.1.0">
+
+    <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="36" />
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- 回执走 adb reverse 到宿主 loopback(http://127.0.0.1:8799)，需要 INTERNET -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 常驻待处理通知：本体自己画，不经过手机 MCP（见 HomeSync） -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
+    <!-- 只连 127.0.0.1 的明文 HTTP（adb reverse 通道）；targetSdk 36 默认禁明文，故显式放行 -->
+    <application
+        android:label="hubreplier"
+        android:allowBackup="false"
+        android:debuggable="true"
+        android:usesCleartextTraffic="true"
+        android:supportsRtl="true">
+
+        <receiver
+            android:name=".ShowReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.chenty.hubreplier.SHOW" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".HomeSync"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <service
+            android:name=".KeepaliveListener"
+            android:exported="false"
+            android:label="hubreplier"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name=".HubActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <activity
+            android:name=".HomeActivity"
+            android:exported="true"
+            android:label="info-hub"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="info-hub 设置"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".DismissReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.chenty.hubreplier.DISMISS" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".ResponseReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.chenty.hubreplier.RESPONSE" />
+                <action android:name="com.chenty.hubreplier.TEST_REPLY" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

@@ -1,0 +1,8 @@
+[Unit]
+Description=info-hub 清理定时器（周日 23:40）
+[Timer]
+OnCalendar=Sun *-*-* 23:40:00
+Persistent=true
+AccuracySec=1min
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,9 @@
+# info-hub M4c：ISO 周报（只读产物，不改 hub-report.md）。
+[Unit]
+Description=info-hub 周报（M4c）
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/文档/deepseek-harness/default-workspace/info-hub
+ExecStart=%h/文档/deepseek-harness/default-workspace/info-hub/bin/hub-week --quiet run
+TimeoutStartSec=120
